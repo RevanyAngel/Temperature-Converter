@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temperature Converter</title>
+    <style>
+        /* --- CSS: Styling Futuristik & Minimalis --- */
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #06b6d4; /* Cyan Neon */
+            --accent-hover: #0891b2;
+            --border-color: rgba(148, 163, 184, 0.2);
+            --success-color: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Latar belakang gradient halus agar tidak flat */
+            background-image: radial-gradient(circle at top right, #1e293b 0%, #0f172a 100%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        /* Glassmorphism Card Style */
+        .converter-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: left;
+        }
+
+        h1 {
+            font-weight: 300;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        /* Input Group Layout (Flexbox) sesuai Wireframe */
+        .input-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap; /* Agar responsif di HP */
+            align-items: center;
+        }
+
+        /* Styling Inputs & Selects */
+        input[type="number"], select {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            flex: 1; /* Mengisi ruang yang tersedia */
+            min-width: 120px;
+        }
+
+        /* Hilangkan spinner pada input number */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+        }
+
+        /* Styling Button */
+        button {
+            padding: 14px 30px;
+            background-color: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-width: 120px;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(6, 182, 212, 0.4);
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        /* Disabled State */
+        button:disabled {
+            background-color: #334155;
+            color: #64748b;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Result Area */
+        .result-area {
+            margin-top: 30px;
+            min-height: 40px; /* Menjaga layout tidak lompat */
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--success-color);
+            opacity: 0; /* Hidden by default */
+            transform: translateY(10px);
+            transition: all 0.5s ease;
+        }
+
+        .result-area.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsif untuk Mobile */
+        @media (max-width: 600px) {
+            .input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="converter-card">
+            <h1>Temperature Converter</h1>
+            <p>By Reee</p>
+            <p class="subtitle">Enter the temperature, select units and submit.</p>
+
+            <form id="tempForm">
+                <div class="input-group">
+                    <input type="number" id="tempInput" placeholder="0.00" step="any">
+                    
+                    <select id="fromUnit">
+                        <option value="" disabled selected>From Unit</option>
+                        <option value="celsius">Celsius</option>
+                        <option value="fahrenheit">Fahrenheit</option>
+                        <option value="kelvin">Kelvin</option>
+                    </select>
+
+                    <select id="toUnit">
+                        <option value="" disabled selected>To Unit</option>
+                        <option value="celsius">Celsius</option>
+                        <option value="fahrenheit">Fahrenheit</option>
+                        <option value="kelvin">Kelvin</option>
+                    </select>
+
+                    <button type="button" id="convertBtn" disabled>Convert</button>
+                </div>
+            </form>
+
+            <div id="resultDisplay" class="result-area">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // --- JavaScript: Logic ---
+
+        // 1. Mengambil elemen dari DOM
+        const tempInput = document.getElementById('tempInput');
+        const fromUnit = document.getElementById('fromUnit');
+        const toUnit = document.getElementById('toUnit');
+        const convertBtn = document.getElementById('convertBtn');
+        const resultDisplay = document.getElementById('resultDisplay');
+
+        // 2. Fungsi untuk validasi input (Enable/Disable Button)
+        function checkInputs() {
+            const tempValue = tempInput.value;
+            const fromValue = fromUnit.value;
+            const toValue = toUnit.value;
+
+            // Tombol aktif HANYA jika input angka terisi DAN kedua dropdown dipilih
+            if (tempValue !== "" && fromValue !== "" && toValue !== "") {
+                convertBtn.disabled = false;
+            } else {
+                convertBtn.disabled = true;
+                // Sembunyikan hasil jika user mengubah input lagi
+                resultDisplay.classList.remove('show'); 
+                resultDisplay.innerText = ''; 
+            }
+        }
+
+        // 3. Event Listeners untuk mendeteksi perubahan input
+        tempInput.addEventListener('input', checkInputs);
+        fromUnit.addEventListener('change', checkInputs);
+        toUnit.addEventListener('change', checkInputs);
+
+        // 4. Logika Konversi Suhu
+        convertBtn.addEventListener('click', () => {
+            const value = parseFloat(tempInput.value);
+            const from = fromUnit.value;
+            const to = toUnit.value;
+            let result = 0;
+
+            // Rumus Konversi
+            if (from === to) {
+                result = value;
+            } else if (from === 'celsius') {
+                if (to === 'fahrenheit') result = (value * 9/5) + 32;
+                if (to === 'kelvin') result = value + 273.15;
+            } else if (from === 'fahrenheit') {
+                if (to === 'celsius') result = (value - 32) * 5/9;
+                if (to === 'kelvin') result = (value - 32) * 5/9 + 273.15;
+            } else if (from === 'kelvin') {
+                if (to === 'celsius') result = value - 273.15;
+                if (to === 'fahrenheit') result = (value - 273.15) * 9/5 + 32;
+            }
+
+            // 5. Menampilkan Hasil
+            // toFixed(2) membatasi angka di belakang koma menjadi 2 digit
+            // Capitalize first letter logic
+            const fromText = from.charAt(0).toUpperCase() + from.slice(1);
+            const toText = to.charAt(0).toUpperCase() + to.slice(1);
+
+            resultDisplay.innerText = `${value} ${fromText} is ${result.toFixed(2)} ${toText}`;
+            resultDisplay.classList.add('show');
+        });
+
+    </script>
+</body>
+</html>
